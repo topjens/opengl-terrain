@@ -35,13 +35,13 @@ void init_screen(const char *caption)
 	  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);*/
 	if(SCREEN_FULLSCREEN) {
 		window = SDL_CreateWindow(caption, SDL_WINDOWPOS_UNDEFINED,
-								  SDL_WINDOWPOS_UNDEFINED, 0, 0,
-								  SDL_WINDOW_FULLSCREEN_DESKTOP |
-								  SDL_WINDOW_OPENGL);
+					  SDL_WINDOWPOS_UNDEFINED, 0, 0,
+					  SDL_WINDOW_FULLSCREEN_DESKTOP |
+					  SDL_WINDOW_OPENGL);
 	} else {
 		window = SDL_CreateWindow(caption, SDL_WINDOWPOS_UNDEFINED,
-								  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
-								  SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
+					  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
+					  SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
 	}
 	if(!window)
 		sdl_die("Couldn't create window");
@@ -56,7 +56,10 @@ void init_screen(const char *caption)
 	printf("Renderer: %s\n", glGetString(GL_RENDERER));
 	printf("Version: %s\n", glGetString(GL_VERSION));
 
-	/* Use V-Sync */
+	/* 
+	 *  Use V-Sync
+	 *  This does not seem to work, solved in SDL event loop
+	 */
 	SDL_GL_SetSwapInterval(1);
 
 	/* Disable depth test & face culling */
