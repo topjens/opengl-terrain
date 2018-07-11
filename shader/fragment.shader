@@ -1,4 +1,4 @@
-unifrom sampler2D tex_terrain;
+uniform sampler2D tex_terrain;
 
 varying vec2 vs_tex_coord;
 

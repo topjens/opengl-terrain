@@ -1,11 +1,11 @@
 CC=gcc
 
 CFLAGS=-I../include `sdl2-config --cflags`
-LIBS= `sdl2-config --libs` -ldl
+LIBS= `sdl2-config --libs` -ldl -lm
 
 all: opengl
 
-opengl: main.o glad.o
+opengl: main.o load_shader.o glad.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 %.o: %.c
