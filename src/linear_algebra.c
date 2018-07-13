@@ -6,7 +6,7 @@ GLfloat *rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 		GLfloat s = (GLfloat)sin((double)angle);
 		GLfloat *result = malloc(4*4*sizeof(GLfloat));
 		
-		len = sqrt((x*x)+(y*y)+(z*z));
+		GLfloat len = sqrt((x*x)+(y*y)+(z*z));
 		x /= len;
 		y /= len;
 		z /= len;
@@ -41,11 +41,6 @@ GLfloat *ortho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top,
 		GLfloat ty = -(top+bottom)/(top-bottom);
 		GLfloat tz = -(farVal+nearVal)/(farVal-nearVal);
 		GLfloat *result = malloc(4*4*sizeof(GLfloat));
-		
-		len = sqrt((x*x)+(y*y)+(z*z));
-		x /= len;
-		y /= len;
-		z /= len;
 
 		result[ 0] = 2.0f/(right-left);
 		result[ 1] = 0.0f;

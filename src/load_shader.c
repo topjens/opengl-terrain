@@ -30,7 +30,7 @@ int link_shaders(GLint fragment_handle, GLint vertex_handle)
 	GLint program_handle = glCreateProgram();
 	
 	glAttachShader(program_handle, fragment_handle);
-	glAttachShader(program_handle, program_handle);
+	glAttachShader(program_handle, vertex_handle);
 
 	glLinkProgram(program_handle);
 	GLint linkSuccess = 0;

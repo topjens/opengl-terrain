@@ -14,6 +14,16 @@
 const int SCREEN_FULLSCREEN = 1;
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 540;
+
+#define GRID 64
+#define GRID_SIZE 3*2*(GRID+1)*(GRID+3)
+
+GLuint vbo;
+GLfloat vert[GRID_SIZE];
+
+GLuint tex_heightmap;
+GLuint tex_terrain;
+
 SDL_Window *window = NULL;
 SDL_GLContext maincontext;
 unsigned char *map;
@@ -73,13 +83,33 @@ void init_screen(const char *caption)
 		SDL_GL_SetSwapInterval(1);
 }
 
+static void opengl_error_callback(GLenum source, GLenum type, GLuint id,
+								  GLenum severity, GLsizei length,
+								  const GLchar *message, const void *param)
+{
+	(void)source;
+	(void)type;
+	(void)id;
+	(void)severity;
+	(void)length;
+	(void)param;
+
+	fprintf(stderr, "%s\n", message);
+	if(severity == GL_DEBUG_SEVERITY_HIGH) {
+		fprintf(stderr, "Aborting...\n");
+		abort();
+	}
+}
+
 void init_gl(void)
 {
-		/* Enable depth test & face culling */
-		glEnable(GL_DEPTH_TEST);
-		glCullFace(GL_FRONT);
-		glEnable(GL_CULL_FACE);
-		glDepthFunc(GL_LESS);
+
+		/* Setup error callback */
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(opengl_error_callback, NULL);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE,
+							  0, NULL, true);
 
 		int w, h;
 		SDL_GetWindowSize(window, &w, &h);
@@ -87,21 +117,71 @@ void init_gl(void)
 		glClearColor(0.0f, 0.5f, 1.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		GLint vertex_handle = attach_shader(GL_VERTEX_SHADER, "../shader/vertex.shader");
+		/* Enable depth test & face culling */
+		glEnable(GL_DEPTH_TEST);
+		glCullFace(GL_FRONT);
+		glEnable(GL_CULL_FACE);
+		glDepthFunc(GL_LESS);
+
+		GLint vertex_handle = attach_shader(GL_VERTEX_SHADER, "../shader/adv-vertex.shader");
 		GLint fragment_handle = attach_shader(GL_FRAGMENT_SHADER, "../shader/fragment.shader");
 		link_shaders(fragment_handle, vertex_handle);
 
-		int tex_heightmap = load_texture("map.bmp");
+		for(int j = 0, count = 0; j < GRID + 1; j++)
+			for(int i = 0; i < GRID + 2; i++)
+			{
+				for(int k = 0; k < ((i==0) ? 2 : 1); k++)
+				{
+					vert[count++] = (float)i/GRID;
+					vert[count++] = (float)j/GRID;
+					vert[count++] = 0.0f;
+					//printf("%f\n%f\n%f\n", (float)i/GRID, (float)j/GRID, 0.0f);
+				}			
+				++j;
+				for(int k = 0; k < ((i==GRID+1) ? 2 : 1); k++)
+				{
+					vert[count++] = (float)i/GRID;
+					vert[count++] = (float)j/GRID;
+					vert[count++] = 0.0f;
+					//printf("%f\n%f\n%f\n", (float)i/GRID, (float)j/GRID, 0.0f);
+				}
+				--j;
+			}
 
-		glGenBuffers(1, (GLuint *)(&vbo));
+		/*glGenBuffers(1, (GLuint *)(&vbo));
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, sizeof(float)*vert.size(), &vert[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)*GRID_SIZE, &vert[0], GL_DYNAMIC_DRAW);
 
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);*/
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0);
-		glRotatef(180, 1, 0, 0);
+	    tex_heightmap = load_texture("map.bmp");
+		tex_terrain = load_texture("map.bmp");
+}
+
+void gl_draw(void)
+{
+	GLint temp;
+	
+    glClearColor(0.0f, 0.5f, 1.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	/* Enable depth test & face culling */
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_FRONT);
+	glEnable(GL_CULL_FACE);
+	glDepthFunc(GL_LESS);
+
+    glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex_heightmap);
+	
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, tex_terrain);
+
+	/*temp = glGetUnifromLocation(program_handle, "tex_heightmap");
+	glUniform1i(temp, 0);
+
+	temp = glGetUnifromLocation(program_handle, "tex_terrain");
+	glUniform1i(temp, 1);*/
 }
 
 int main(int argc, char *argv[])
@@ -120,6 +200,7 @@ int main(int argc, char *argv[])
 				if(((ticks*10-lastticks*10)) < 167)
 						SDL_Delay((167-((ticks*10-lastticks*10)))/10);
 				lastticks = SDL_GetTicks();
+				gl_draw();
 				SDL_GL_SwapWindow(window);
 				while(SDL_PollEvent(&event)) {
 						if(event.type == SDL_QUIT) {
