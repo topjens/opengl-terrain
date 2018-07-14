@@ -1,8 +1,8 @@
-uniform sampler2D tex_terrain;
+#version 430 core
 
-varying vec2 vs_tex_coord;
+out vec4 fColor;
 
-void main(void)
+void main()
 {
-  gl_FragColor = texture2D(tex_terrain, vs_tex_coord);
+	fColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <glad/glad.h>
+
+#include <SDL2/SDL.h>
+
 #include "shader.h"
 
 #define BUFFER_OFFSET(offset) ((void *)(offset))
@@ -12,6 +17,11 @@ GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
 const GLuint NumVertices = 6;
+
+void sdl(void)
+{
+
+}
 
 void init(void)
 {
@@ -58,21 +68,23 @@ void display(void)
 
 int main(int argc, char *argv[])
 {
-		glutInit(&argc, argv);
+	/*glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_RGBA);
 		glutInitWindowSize(512, 512);
 		glutInitContextVersion(4, 3);
 		glutInitContextProfile(GLUT_CORE_PROFILE);
-		glutCreateWindow(argv[0]);
+		glutCreateWindow(argv[0]);*/
 
-		if(glewInit()) {
+	/*if(glewInit()) {
 				fprintf(stderr, "Unable to initialize GLEW... exiting\n");
-				exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE);*/
 		}
+
+		sdl();
 
 		init();
 
-		glutDisplayFunc(display);
+/*	glutDisplayFunc(display);
 
-		glutMainLoop();
+	glutMainLoop();*/
 }

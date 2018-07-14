@@ -1,54 +1,56 @@
 #include "load_shader.h"
 
-GLint attach_shader(GLint type, char *filename)
+GLuint load_shaders(shader_info *shaders)
 {
-	char *mem = read_file(filename);
-	if(!mem)
-		fprintf(stderr, "Could not open file %s!\n", filename);
+	char *shader_source;
+	GLuint program = glCreateProgram();
 
-	GLuint handle = glCreateShader(type);
-	glShaderSource(handle, 1, (const GLchar **)(&mem), 0);
-	glCompileShader(handle);
-	GLint compileSuccess = 0;
-	GLchar compilerSpew[256];
+	while(shaders->name)
+	{
+		printf("Loading shader %s\n", shaders->name);
 
-	glGetShaderiv(handle, GL_COMPILE_STATUS, &compileSuccess);
-	if(!compileSuccess) {
-		glGetShaderInfoLog(handle, sizeof(compilerSpew), 0, compilerSpew);
-		fprintf(stderr, "Could not compile shader %s\nMessage = %s\nreturn value = %d\n", filename, compilerSpew, compileSuccess);
-		free(mem);
-		return -1;
+		shader_source = read_file(shaders->name);
+		if(!shader_source) {
+			fprintf(stderr, "Could not open file %s\n", shaders->name);
+			return 0;
+		}
+
+		GLuint shader = glCreateShader(shaders->type);
+		glShaderSource(shader, 1, (const GLchar **)(&shader_source), 0);
+		glCompileShader(shader);
+
+		GLint compileSuccess = 0;
+		GLchar compilerSpew[256];
+
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileSuccess);
+		if(!compileSuccess) {
+			glGetShaderInfoLog(shader, sizeof(compilerSpew), 0, compilerSpew);
+			fprintf(stderr, "Could not compile shader %s\nMessage = %s\nreturn value = %d\n", shaders->type, compilerSpew, compileSuccess);
+			free(shader_source);
+			return 0;
+		}
+	
+		glAttachShader(program, shader);
+
+		free(shader_source);
+		shaders++;
 	}
 
-	free(mem);
-	return handle;
-}
-
-int link_shaders(GLint fragment_handle, GLint vertex_handle)
-{
-	int i;
-	GLint program_handle = glCreateProgram();
+	glLinkProgram(program);
 	
-	glAttachShader(program_handle, fragment_handle);
-	glAttachShader(program_handle, vertex_handle);
-
-	glLinkProgram(program_handle);
 	GLint linkSuccess = 0;
 	GLchar linkSpew[256];
-
-	glGetProgramiv(program_handle, GL_LINK_STATUS, &linkSuccess);
+	glGetProgramiv(program, GL_LINK_STATUS, &linkSuccess);
 	if(!linkSuccess) {
-		glGetProgramInfoLog(program_handle, sizeof(linkSpew), 0, linkSpew);
+		glGetProgramInfoLog(program, sizeof(linkSpew), 0, linkSpew);
 		fprintf(stderr, "Could not link\nMessage = %s\nreturn value = %d\n", linkSpew, linkSuccess);
 		return 0;
 	}
-	return 1;
+
+	return program;
 }
 
-/*
- * Reads file `Filename' and returns its contents as a char *
- */
-char *read_file(char *filename)
+char *read_file(const char *filename)
 {
 	FILE *fp = fopen(filename, "r");
 
