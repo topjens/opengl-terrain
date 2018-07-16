@@ -19,7 +19,8 @@ const int SCREEN_HEIGHT = 540;
 
 GLuint program;
 
-GLuint mode = GL_POINTS;
+GLuint mode[] = {GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_LINE_STRIP_ADJACENCY, GL_LINES_ADJACENCY, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES, GL_TRIANGLE_STRIP_ADJACENCY, GL_TRIANGLES_ADJACENCY};
+int mode_num = 0, mode_max = sizeof(mode)/sizeof(GLuint);
 
 enum VAO_IDs { Triangles, NumVAOs };
 enum Buffer_IDs { ArrayBuffer, NumBuffers };
@@ -28,7 +29,7 @@ enum Attrib_IDs { vPosition = 0 };
 GLuint VAOs[NumVAOs];
 GLuint Buffers[NumBuffers];
 
-const GLuint NumVertices = 6;
+const GLuint NumVertices = 30;
 
 GLuint tex_heightmap;
 GLuint tex_terrain;
@@ -132,13 +133,14 @@ void init_gl(void)
 	glGenVertexArrays(NumVAOs, VAOs);
 	glBindVertexArray(VAOs[Triangles]);
 
-	GLfloat vertices[6][2] = {
-		{-0.90, -0.90}, /* Triangle 1 */
-		{ 0.85, -0.90},
-		{-0.90,  0.85},
-		{ 0.90, -0.85}, /* Triangle 2 */
-		{ 0.90,  0.90},
-		{-0.85,  0.90}
+	GLfloat vertices[90] = {
+		/* {-0.90, -0.90}, /\* Triangle 1 *\/ */
+		/* { 0.85, -0.90}, */
+		/* {-0.90,  0.85}, */
+		/* { 0.90, -0.85}, /\* Triangle 2 *\/ */
+		/* { 0.90,  0.90}, */
+		/* {-0.85,  0.90} */
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.5f, 0.0f, 1.5f, 0.0f, 0.0f, 1.5f, 0.5f, 0.0f, 1.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.5f, 0.5f, 0.0f, 1.5f, 1.0f, 0.0f, 1.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.5f, 0.0f, 0.5f, 1.0f, 0.0f, 0.5f, 1.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.5f, 0.0f, 1.5f, 1.0f, 0.0f, 1.5f, 1.5f, 0.0f, 1.5f, 1.5f, 0.0f
 	};
 
 	glGenBuffers(NumBuffers, Buffers);
@@ -165,7 +167,7 @@ void gl_draw(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindVertexArray(VAOs[Triangles]);
-	glDrawArrays(mode, 0, NumVertices);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, NumVertices);
 
 	glFlush();
 }
@@ -196,9 +198,6 @@ int main(int argc, char *argv[])
 					quit = true;
 					break;
 				case SDLK_SPACE:
-					mode++;
-					if(mode > 6)
-						mode = GL_POINTS;
 					break;
 				default:
 					break;
